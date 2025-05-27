@@ -6,7 +6,14 @@ class ConsumerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Opciones del consumidor')),
+      appBar: AppBar(
+        title: Text(
+          'Opciones del consumidor',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.lightGreen, // A lighter, more "fruity" green
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
       body: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -18,7 +25,17 @@ class ConsumerScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => MangoMarketplace()),
                 );
               },
-              child: Text('Ingresar al marketplace'),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.shopping_cart, color: Colors.white),
+                  SizedBox(width: 5),
+                  Text('Marketplace', style: TextStyle(color: Colors.white)),
+                ],
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green, // Use a fruit-related color
+              ),
             ),
             ElevatedButton(
               onPressed: () {
@@ -27,7 +44,15 @@ class ConsumerScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => QRScannerScreen()),
                 );
               },
-              child: Text('EscanearQR'),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.qr_code_scanner, color: Colors.white),
+                  SizedBox(width: 5),
+                  Text('Escanear QR', style: TextStyle(color: Colors.white)),
+                ],
+              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
             ),
           ],
         ),
@@ -42,49 +67,44 @@ class QRScannerScreen extends StatefulWidget {
 }
 
 class _QRScannerScreenState extends State<QRScannerScreen> {
-  CameraController? _controller; // Make it nullable
-  late Future<void> _initializeControllerFuture = Future.value();
+  CameraController? _controller;
+  late Future<void> _initializeControllerFuture;
 
   @override
   void initState() {
     super.initState();
-    // To display the current output from the Camera,
-    // create a CameraController.
-    _initializeCamera();
+    _initializeControllerFuture = _initializeCamera();
   }
 
   Future<void> _initializeCamera() async {
     try {
       final cameras = await availableCameras();
-      // Get a specific camera from the list of available cameras.
       if (cameras.isNotEmpty) {
         final firstCamera = cameras.first;
 
-        _controller = CameraController(
-          // Get a specific camera from the list of available cameras.
-          firstCamera,
-          // Define the resolution to use.
-          ResolutionPreset.medium,
-        );
+        _controller = CameraController(firstCamera, ResolutionPreset.medium);
 
-        // Next, initialize the controller. This returns a Future.
-        _initializeControllerFuture = _controller!.initialize();
+        try {
+          await _controller!.initialize();
+        } catch (e) {
+          print('Error initializing camera: $e');
+          _controller = null;
+        }
       } else {
-        // Handle the case where no cameras are available.
         print('No cameras available');
-        _controller = null; // Ensure _controller is null
+        _controller = null;
       }
     } catch (e) {
-      // If the camera is not available or permissions are not granted,
-      // display an error message.
       print('Error initializing camera: $e');
-      _controller = null; // Ensure _controller is null
+      _controller = null;
+    }
+    if (mounted) {
+      setState(() {});
     }
   }
 
   @override
   void dispose() {
-    // Dispose of the controller when the widget is disposed.
     _controller?.dispose();
     super.dispose();
   }
@@ -101,11 +121,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           }
 
           if (snapshot.connectionState == ConnectionState.done) {
-            if (_controller != null &&
-                _controller?.value.isInitialized == true) {
-              return CameraPreview(_controller!);
+            if (_controller == null || !_controller!.value.isInitialized) {
+              return Center(child: Text('HA OCURRIDO UN ERROR'));
             } else {
-              return Center(child: Text('gf'));
+              return CameraPreview(_controller!);
             }
           } else {
             return Center(child: CircularProgressIndicator());
