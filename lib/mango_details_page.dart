@@ -1,33 +1,7 @@
 import 'package:flutter/material.dart';
-import 'mango_marketplace.dart';
-
-class MangoDetailsPage extends StatelessWidget {
-  final Mango mango;
-
-  const MangoDetailsPage({Key? key, required this.mango}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(mango.name)),
-      body: ListView(
-        children: [
-          Image.network(
-            mango.imageUrl,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: 300,
-          ),
-          _QuantitySelector(mango: mango),
-          _MangoDetails(mango: mango),
-        ],
-      ),
-    );
-  }
-}
 
 class _QuantitySelector extends StatefulWidget {
-  final Mango mango;
+  final Map<String, dynamic> mango;
 
   _QuantitySelector({required this.mango});
 
@@ -42,7 +16,7 @@ class _QuantitySelectorState extends State<_QuantitySelector> {
   @override
   void initState() {
     super.initState();
-    _currentPrice = widget.mango.price;
+    _currentPrice = double.parse(widget.mango['price'].toString());
   }
 
   @override
@@ -58,7 +32,9 @@ class _QuantitySelectorState extends State<_QuantitySelector> {
                 setState(() {
                   if (_quantity > 1) {
                     _quantity--;
-                    _currentPrice = widget.mango.price * _quantity;
+                    _currentPrice =
+                        double.parse(widget.mango['price'].toString()) *
+                        _quantity;
                   }
                 });
               },
@@ -69,7 +45,9 @@ class _QuantitySelectorState extends State<_QuantitySelector> {
               onPressed: () {
                 setState(() {
                   _quantity++;
-                  _currentPrice = widget.mango.price * _quantity;
+                  _currentPrice =
+                      double.parse(widget.mango['price'].toString()) *
+                      _quantity;
                 });
               },
             ),
@@ -87,61 +65,42 @@ class _QuantitySelectorState extends State<_QuantitySelector> {
   }
 }
 
-class _MangoDetails extends StatelessWidget {
-  final Mango mango;
+class MangoDetailsPage extends StatelessWidget {
+  final Map<String, dynamic> mango;
 
-  const _MangoDetails({Key? key, required this.mango}) : super(key: key);
+  const MangoDetailsPage({Key? key, required this.mango}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final details = [
-      'Origen del Mango: ${mango.origin}',
-      'Nombre de la finca o productor: ${mango.farmName}',
-      'Ubicación geográfica: ${mango.location}',
-      'Fecha de cosecha: ${mango.harvestDate}',
-      'Variedad del Mango: ${mango.variety}',
-      'Tipo: ${mango.type}',
-      'Características de sabor y textura: ${mango.flavor}',
-      'Métodos de Cultivo: ${mango.cultivationMethods}',
-      'Tipo de cultivo: ${mango.cultivationType}',
-      'Certificaciones: ${mango.certifications}',
-      'Uso de pesticidas o fertilizantes: ${mango.pesticides}',
-      'Proceso de Cosecha y Empaque: ${mango.harvestProcess}',
-      'Fecha de recolección: ${mango.collectionDate}',
-      'Condiciones de cosecha: ${mango.harvestConditions}',
-      'Centro de empaque: ${mango.packingCenter}',
-      'Temperatura durante el transporte: ${mango.transportTemperature}',
-      'Transporte: ${mango.transport}',
-      'Medio de transporte: ${mango.transportMethod}',
-      'Fecha de salida y llegada: ${mango.departureDate}',
-      'Tiempo total de traslado: ${mango.totalTravelTime}',
-      'Control de Calidad: ${mango.qualityControl}',
-      'Pruebas realizadas: ${mango.testsPerformed}',
-      'Resultados de calidad: ${mango.qualityResults}',
-      'Fecha de inspección: ${mango.inspectionDate}',
-      'Datos del Lote: ${mango.lotData}',
-      'Código QR o ID del lote: ${mango.qrCode}',
-      'Lote de producción: ${mango.productionLot}',
-      'Cantidad de frutas en el lote: ${mango.fruitQuantity}',
-      'Sostenibilidad: ${mango.sustainability}',
-      'Huella de carbono estimada: ${mango.carbonFootprint}',
-      'Acciones sostenibles del productor: ${mango.sustainableActions}',
-      'Impacto social en la comunidad local: ${mango.socialImpact}',
-      'Recomendaciones de Consumo: ${mango.consumptionRecommendations}',
-    ];
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListView.builder(
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        itemCount: details.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: Text(details[index], style: TextStyle(fontSize: 16)),
-          );
-        },
+    return Scaffold(
+      appBar: AppBar(title: Text('Información')),
+      body: ListView(
+        children: [
+          Center(
+            child: Image.network(
+              mango['imageUrl'],
+              fit: BoxFit.cover,
+              width: 350,
+              height: 300,
+            ),
+          ),
+          _QuantitySelector(mango: mango),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              '${mango['name']} 🥭',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.left,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'El mango Kent es una variedad de mango reconocida por su sabor dulce, suave y bajo contenido de fibra. Su pulpa es jugosa y de color amarillo intenso, ideal para consumir fresca o en preparaciones como jugos, batidos y postres. Se caracteriza por su forma ovalada, piel verde con rubor rojo, y una textura firme que facilita su manipulación y transporte.\nSu contenido de azúcar natural (Brix) lo hace muy apreciado tanto en mercados locales como internacionales.',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
       ),
     );
   }
