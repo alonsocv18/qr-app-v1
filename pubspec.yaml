@@ -22,3 +22,5 @@ flutter:
   assets:
     - assets/agricultor.png
     - assets/client.png
+    - assets/market.jpg
+    - assets/qrcode.png

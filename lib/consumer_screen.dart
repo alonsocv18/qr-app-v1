@@ -15,44 +15,68 @@ class ConsumerScreen extends StatelessWidget {
         iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Center(
-        child: Row(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MangoMarketplace()),
-                );
-              },
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.shopping_cart, color: Colors.white),
-                  SizedBox(width: 5),
-                  Text('Marketplace', style: TextStyle(color: Colors.white)),
-                ],
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green, // Use a fruit-related color
-              ),
+            Column(
+              children: [
+                Image.asset('assets/market.jpg', width: 100, height: 100),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MangoMarketplace(),
+                      ),
+                    );
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.shopping_cart, color: Colors.white),
+                      SizedBox(height: 0),
+                      Text(
+                        'Marketplace',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.lightGreen.shade700,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => QRScannerScreen()),
-                );
-              },
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.qr_code_scanner, color: Colors.white),
-                  SizedBox(width: 5),
-                  Text('Escanear QR', style: TextStyle(color: Colors.white)),
-                ],
-              ),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+            Column(
+              children: [
+                Image.asset('assets/qrcode.png', width: 100, height: 100),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => QRScannerScreen(),
+                      ),
+                    );
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.qr_code_scanner, color: Colors.white),
+                      SizedBox(height: 0),
+                      Text(
+                        'Escanear QR',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.brown.shade700,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
