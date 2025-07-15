@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "450300379372",
+    "project_id": "agriqr-423c9",
+    "storage_bucket": "agriqr-423c9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:450300379372:android:ef35e1c711ad2022e4e5c9",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6V7gA68GgNq4Yes7S_2iUBin4yNYehiI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

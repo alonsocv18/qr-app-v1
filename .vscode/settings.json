@@ -1,0 +1,13 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.home": "/home/semgar/.jdks/openjdk-23.0.1",
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-23",
+            "path": "/home/semgar/.jdks/openjdk-23.0.1",
+            "default": true
+        }
+    ],
+    "java.import.gradle.java.home": "/home/semgar/.jdks/openjdk-23.0.1",
+    "java.import.gradle.offline.enabled": false
+}
