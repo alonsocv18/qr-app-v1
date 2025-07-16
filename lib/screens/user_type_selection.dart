@@ -4,12 +4,49 @@ import '../utils/constants.dart';
 import 'consumer_screen.dart';
 import 'farmer_screen.dart';
 import 'dashboard_screen.dart';
+import '../services/firebase_service.dart';
+import 'agricultor_pin_screen.dart';
 
-class UserTypeSelection extends StatelessWidget {
+class UserTypeSelection extends StatefulWidget {
   const UserTypeSelection({super.key});
 
   @override
+  State<UserTypeSelection> createState() => _UserTypeSelectionState();
+}
+
+class _UserTypeSelectionState extends State<UserTypeSelection> {
+  bool _isLoading = false;
+  String? _userEmail;
+
+  @override
+  void initState() {
+    super.initState();
+    _signInWithGoogleIfNeeded();
+  }
+
+  Future<void> _signInWithGoogleIfNeeded() async {
+    setState(() { _isLoading = true; });
+    final user = FirebaseService.getCurrentUser();
+    if (user == null) {
+      final credential = await FirebaseService.signInWithGoogle();
+      if (credential == null) {
+        setState(() { _isLoading = false; });
+        return;
+      }
+      setState(() { _userEmail = credential.user?.email; });
+    } else {
+      setState(() { _userEmail = user.email; });
+    }
+    setState(() { _isLoading = false; });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -22,14 +59,30 @@ class UserTypeSelection extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
+            if (_userEmail != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 40.0),
+                child: Text(
+                  'Bienvenido, $_userEmail',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    shadows: [Shadow(blurRadius: 4, color: Colors.black54, offset: Offset(1, 1))],
+                  ),
+                ),
+              ),
             _buildOption(
               context,
               imagePath: 'assets/agricultor.png',
               label: 'SOY AGRICULTOR',
-              onTap: () {
+              onTap: () async {
+                setState(() { _isLoading = true; });
+                await FirebaseService.setUserRole('agricultor');
+                setState(() { _isLoading = false; });
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const FarmerScreen()),
+                  MaterialPageRoute(builder: (context) => const AgricultorPinScreen()),
                 );
               },
             ),
@@ -37,14 +90,16 @@ class UserTypeSelection extends StatelessWidget {
               context,
               imagePath: 'assets/client.png',
               label: 'SOY CONSUMIDOR',
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                setState(() { _isLoading = true; });
+                await FirebaseService.setUserRole('consumidor');
+                setState(() { _isLoading = false; });
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const ConsumerScreen()),
                 );
               },
             ),
-            // Botón para pruebas de Firebase
             _buildTestButton(context),
           ],
         ),

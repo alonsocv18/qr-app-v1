@@ -4,12 +4,47 @@ import 'farmer_forms/postcosecha_screen.dart';
 import 'farmer_forms/empacado_screen.dart';
 import 'farmer_forms/distribucion_screen.dart';
 import 'lote_management_screen.dart';
+import '../services/firebase_service.dart';
+import 'user_type_selection.dart';
 
-class FarmerScreen extends StatelessWidget {
+class FarmerScreen extends StatefulWidget {
   const FarmerScreen({super.key});
 
   @override
+  State<FarmerScreen> createState() => _FarmerScreenState();
+}
+
+class _FarmerScreenState extends State<FarmerScreen> {
+  bool _checkingRole = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkRole();
+  }
+
+  Future<void> _checkRole() async {
+    final rol = await FirebaseService.getUserRole();
+    if (rol != 'agricultor') {
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const UserTypeSelection()),
+          (route) => false,
+        );
+      }
+    } else {
+      setState(() { _checkingRole = false; });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_checkingRole) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text(

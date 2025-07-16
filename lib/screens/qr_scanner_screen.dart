@@ -5,6 +5,7 @@ import '../services/firebase_service.dart';
 import '../models/trazability_models.dart';
 import 'trazability_info_screen.dart';
 import 'dart:convert';
+import 'user_type_selection.dart';
 
 class QRScannerScreen extends StatefulWidget {
   const QRScannerScreen({super.key});
@@ -20,11 +21,28 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   String _statusMessage = 'Iniciando...';
   String _lastScannedData = 'Ningún QR escaneado';
   int _scanAttempts = 0;
+  bool _checkingRole = true;
 
   @override
   void initState() {
     super.initState();
+    _checkRole();
     _requestCameraPermission();
+  }
+
+  Future<void> _checkRole() async {
+    final rol = await FirebaseService.getUserRole();
+    if (rol != 'agricultor' && rol != 'consumidor') {
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const UserTypeSelection()),
+          (route) => false,
+        );
+      }
+    } else {
+      setState(() { _checkingRole = false; });
+    }
   }
 
   Future<void> _requestCameraPermission() async {
@@ -189,6 +207,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_checkingRole) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Escanear QR - DEBUG'),

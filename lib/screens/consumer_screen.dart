@@ -1,12 +1,47 @@
 import 'package:flutter/material.dart';
 import 'mango_marketplace.dart';
 import 'qr_scanner_screen.dart';
+import '../services/firebase_service.dart';
+import 'user_type_selection.dart';
 
-class ConsumerScreen extends StatelessWidget {
+class ConsumerScreen extends StatefulWidget {
   const ConsumerScreen({super.key});
 
   @override
+  State<ConsumerScreen> createState() => _ConsumerScreenState();
+}
+
+class _ConsumerScreenState extends State<ConsumerScreen> {
+  bool _checkingRole = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkRole();
+  }
+
+  Future<void> _checkRole() async {
+    final rol = await FirebaseService.getUserRole();
+    if (rol != 'consumidor') {
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const UserTypeSelection()),
+          (route) => false,
+        );
+      }
+    } else {
+      setState(() { _checkingRole = false; });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_checkingRole) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text(

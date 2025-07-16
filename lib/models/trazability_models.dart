@@ -367,12 +367,42 @@ class Distribucion {
   }
 }
 
+// Modelo para la recepción en el punto de venta
+class RecepcionPuntoVenta {
+  final String lugar;
+  final DateTime fechaRecepcion;
+  final String recibidoPor;
+
+  RecepcionPuntoVenta({
+    required this.lugar,
+    required this.fechaRecepcion,
+    required this.recibidoPor,
+  });
+
+  factory RecepcionPuntoVenta.fromMap(Map<String, dynamic> map) {
+    return RecepcionPuntoVenta(
+      lugar: map['lugar'] ?? '',
+      fechaRecepcion: DateTime.parse(map['fechaRecepcion']),
+      recibidoPor: map['recibidoPor'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'lugar': lugar,
+      'fechaRecepcion': fechaRecepcion.toIso8601String(),
+      'recibidoPor': recibidoPor,
+    };
+  }
+}
+
 // Modelo completo de trazabilidad que contiene toda la información
 class TrazabilidadCompleta {
   final Lote lote;
   final Postcosecha? postcosecha;
   final Empacado? empacado;
   final Distribucion? distribucion;
+  final RecepcionPuntoVenta? recepcionPuntoVenta;
   final DateTime fechaCreacion;
 
   TrazabilidadCompleta({
@@ -380,6 +410,7 @@ class TrazabilidadCompleta {
     this.postcosecha,
     this.empacado,
     this.distribucion,
+    this.recepcionPuntoVenta,
     required this.fechaCreacion,
   });
 
@@ -408,6 +439,7 @@ class TrazabilidadCompleta {
       'postcosecha': postcosecha?.toMap(),
       'empacado': empacado?.toMap(),
       'distribucion': distribucion?.toMap(),
+      'recepcionPuntoVenta': recepcionPuntoVenta?.toMap(),
     };
   }
 
@@ -422,6 +454,9 @@ class TrazabilidadCompleta {
           : null,
       distribucion: map['distribucion'] != null 
           ? Distribucion.fromMap(map['distribucion']) 
+          : null,
+      recepcionPuntoVenta: map['recepcionPuntoVenta'] != null
+          ? RecepcionPuntoVenta.fromMap(map['recepcionPuntoVenta'])
           : null,
       fechaCreacion: DateTime.parse(map['fechaCreacion']),
     );

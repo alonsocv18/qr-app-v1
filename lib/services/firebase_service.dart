@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import '../models/trazability_models.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class FirebaseService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -15,6 +16,10 @@ class FirebaseService {
   static const String _postcosechaCollection = 'postcosecha';
   static const String _empacadoCollection = 'empacado';
   static const String _trazabilidadCollection = 'trazabilidad';
+
+  // Colecciones adicionales
+  static const String _usuariosCollection = 'usuarios';
+  static const String _pinsAgricultoresCollection = 'pins_agricultores';
 
   // Autenticación
   static Future<UserCredential?> signInAnonymously() async {
@@ -50,6 +55,65 @@ class FirebaseService {
     } else {
       print('🔐 ensureAuthenticated: Usuario ya autenticado');
     }
+  }
+
+  // Autenticación con Google
+  static Future<UserCredential?> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        return null; // Cancelado por el usuario
+      }
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      return await _auth.signInWithCredential(credential);
+    } catch (e) {
+      debugPrint('Error en signInWithGoogle: $e');
+      return null;
+    }
+  }
+
+  // Obtener el rol del usuario actual
+  static Future<String?> getUserRole() async {
+    final user = getCurrentUser();
+    if (user == null) return null;
+    final doc = await _firestore.collection(_usuariosCollection).doc(user.uid).get();
+    if (!doc.exists) return null;
+    return doc.data()!["rol"] as String?;
+  }
+
+  // Asignar rol al usuario actual
+  static Future<void> setUserRole(String rol) async {
+    final user = getCurrentUser();
+    if (user == null) return;
+    await _firestore.collection(_usuariosCollection).doc(user.uid).set({
+      'uid': user.uid,
+      'email': user.email,
+      'rol': rol,
+    }, SetOptions(merge: true));
+  }
+
+  // Validar PIN de agricultor
+  static Future<bool> validateAgricultorPin(String pin) async {
+    final query = await _firestore
+        .collection(_pinsAgricultoresCollection)
+        .where('pin', isEqualTo: pin)
+        .where('asignado', isEqualTo: false)
+        .limit(1)
+        .get();
+    if (query.docs.isEmpty) return false;
+    // Marcar el PIN como asignado y asociar al usuario
+    final user = getCurrentUser();
+    if (user != null) {
+      await query.docs.first.reference.update({
+        'asignado': true,
+        'usuarioId': user.uid,
+      });
+    }
+    return true;
   }
 
   // CRUD para Lotes

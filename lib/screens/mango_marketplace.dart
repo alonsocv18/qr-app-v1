@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/mango.dart';
 import '../utils/constants.dart';
 import '../widgets/mango_card.dart';
+import '../services/firebase_service.dart';
+import 'user_type_selection.dart';
 
 class MangoMarketplace extends StatefulWidget {
   const MangoMarketplace({super.key});
@@ -11,6 +13,7 @@ class MangoMarketplace extends StatefulWidget {
 }
 
 class _MangoMarketplaceState extends State<MangoMarketplace> {
+  bool _checkingRole = true;
   String _searchText = '';
 
   List<Mango> get filteredMangos {
@@ -24,7 +27,33 @@ class _MangoMarketplaceState extends State<MangoMarketplace> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _checkRole();
+  }
+
+  Future<void> _checkRole() async {
+    final rol = await FirebaseService.getUserRole();
+    if (rol != 'consumidor') {
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const UserTypeSelection()),
+          (route) => false,
+        );
+      }
+    } else {
+      setState(() { _checkingRole = false; });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_checkingRole) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Container(

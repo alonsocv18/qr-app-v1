@@ -1,16 +1,47 @@
 import 'package:flutter/material.dart';
 import '../models/trazability_models.dart';
+import '../services/firebase_service.dart';
+import 'user_type_selection.dart';
 
-class TrazabilityInfoScreen extends StatelessWidget {
+class TrazabilityInfoScreen extends StatefulWidget {
   final TrazabilidadCompleta trazabilidad;
+  const TrazabilityInfoScreen({super.key, required this.trazabilidad});
 
-  const TrazabilityInfoScreen({
-    super.key,
-    required this.trazabilidad,
-  });
+  @override
+  State<TrazabilityInfoScreen> createState() => _TrazabilityInfoScreenState();
+}
+
+class _TrazabilityInfoScreenState extends State<TrazabilityInfoScreen> {
+  bool _checkingRole = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkRole();
+  }
+
+  Future<void> _checkRole() async {
+    final rol = await FirebaseService.getUserRole();
+    if (rol != 'agricultor' && rol != 'consumidor') {
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const UserTypeSelection()),
+          (route) => false,
+        );
+      }
+    } else {
+      setState(() { _checkingRole = false; });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_checkingRole) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Información de Trazabilidad'),
@@ -26,15 +57,15 @@ class TrazabilityInfoScreen extends StatelessWidget {
             const SizedBox(height: 20),
             _buildLoteInfo(),
             const SizedBox(height: 20),
-            if (trazabilidad.postcosecha != null) ...[
+            if (widget.trazabilidad.postcosecha != null) ...[
               _buildPostcosechaInfo(),
               const SizedBox(height: 20),
             ],
-            if (trazabilidad.empacado != null) ...[
+            if (widget.trazabilidad.empacado != null) ...[
               _buildEmpacadoInfo(),
               const SizedBox(height: 20),
             ],
-            if (trazabilidad.distribucion != null) ...[
+            if (widget.trazabilidad.distribucion != null) ...[
               _buildDistribucionInfo(),
               const SizedBox(height: 20),
             ],
@@ -73,7 +104,7 @@ class TrazabilityInfoScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Mango ${trazabilidad.lote.variedad}',
+            'Mango ${widget.trazabilidad.lote.variedad}',
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -82,7 +113,7 @@ class TrazabilityInfoScreen extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           Text(
-            'ID: ${trazabilidad.lote.id}',
+            'ID: ${widget.trazabilidad.lote.id}',
             style: const TextStyle(
               fontSize: 16,
               color: Colors.white70,
@@ -99,20 +130,20 @@ class TrazabilityInfoScreen extends StatelessWidget {
       icon: Icons.agriculture,
       color: Colors.green,
       children: [
-        _buildInfoRow('Productor', trazabilidad.lote.productor),
-        _buildInfoRow('Ubicación', trazabilidad.lote.ubicacion),
-        _buildInfoRow('Variedad', trazabilidad.lote.variedad),
+        _buildInfoRow('Productor', widget.trazabilidad.lote.productor),
+        _buildInfoRow('Ubicación', widget.trazabilidad.lote.ubicacion),
+        _buildInfoRow('Variedad', widget.trazabilidad.lote.variedad),
         _buildInfoRow('Fecha de Cosecha', 
-          '${trazabilidad.lote.fechaCosecha.day}/${trazabilidad.lote.fechaCosecha.month}/${trazabilidad.lote.fechaCosecha.year}'),
-        if (trazabilidad.lote.coordenadasGPS != null)
-          _buildInfoRow('Coordenadas GPS', trazabilidad.lote.coordenadasGPS!),
-        _buildInfoRow('Estado', _getEstadoText(trazabilidad.lote.estado)),
+          '${widget.trazabilidad.lote.fechaCosecha.day}/${widget.trazabilidad.lote.fechaCosecha.month}/${widget.trazabilidad.lote.fechaCosecha.year}'),
+        if (widget.trazabilidad.lote.coordenadasGPS != null)
+          _buildInfoRow('Coordenadas GPS', widget.trazabilidad.lote.coordenadasGPS!),
+        _buildInfoRow('Estado', _getEstadoText(widget.trazabilidad.lote.estado)),
       ],
     );
   }
 
   Widget _buildPostcosechaInfo() {
-    final postcosecha = trazabilidad.postcosecha!;
+    final postcosecha = widget.trazabilidad.postcosecha!;
     return _buildInfoCard(
       title: 'Información de Postcosecha',
       icon: Icons.water_drop,
@@ -129,7 +160,7 @@ class TrazabilityInfoScreen extends StatelessWidget {
   }
 
   Widget _buildEmpacadoInfo() {
-    final empacado = trazabilidad.empacado!;
+    final empacado = widget.trazabilidad.empacado!;
     return _buildInfoCard(
       title: 'Información de Empacado',
       icon: Icons.inventory_2,
@@ -147,7 +178,7 @@ class TrazabilityInfoScreen extends StatelessWidget {
   }
 
   Widget _buildDistribucionInfo() {
-    final distribucion = trazabilidad.distribucion!;
+    final distribucion = widget.trazabilidad.distribucion!;
     return _buildInfoCard(
       title: 'Información de Distribución',
       icon: Icons.local_shipping,
@@ -177,33 +208,33 @@ class TrazabilityInfoScreen extends StatelessWidget {
       children: [
         _buildTimelineStep(
           'Cosecha',
-          '${trazabilidad.lote.fechaCosecha.day}/${trazabilidad.lote.fechaCosecha.month}/${trazabilidad.lote.fechaCosecha.year}',
+          '${widget.trazabilidad.lote.fechaCosecha.day}/${widget.trazabilidad.lote.fechaCosecha.month}/${widget.trazabilidad.lote.fechaCosecha.year}',
           Icons.agriculture,
           Colors.green,
           isCompleted: true,
         ),
         _buildTimelineStep(
           'Postcosecha',
-          trazabilidad.postcosecha != null ? 'Completado' : 'Pendiente',
+          widget.trazabilidad.postcosecha != null ? 'Completado' : 'Pendiente',
           Icons.water_drop,
           Colors.blue,
-          isCompleted: trazabilidad.postcosecha != null,
+          isCompleted: widget.trazabilidad.postcosecha != null,
         ),
         _buildTimelineStep(
           'Empacado',
-          trazabilidad.empacado != null ? 'Completado' : 'Pendiente',
+          widget.trazabilidad.empacado != null ? 'Completado' : 'Pendiente',
           Icons.inventory_2,
           Colors.orange,
-          isCompleted: trazabilidad.empacado != null,
+          isCompleted: widget.trazabilidad.empacado != null,
         ),
         _buildTimelineStep(
           'Distribución',
-          trazabilidad.distribucion != null 
-              ? (trazabilidad.distribucion!.estado == 'entregado' ? 'Entregado' : 'En tránsito')
+          widget.trazabilidad.distribucion != null 
+              ? (widget.trazabilidad.distribucion!.estado == 'entregado' ? 'Entregado' : 'En tránsito')
               : 'Pendiente',
           Icons.local_shipping,
           Colors.red,
-          isCompleted: trazabilidad.distribucion != null,
+          isCompleted: widget.trazabilidad.distribucion != null,
         ),
       ],
     );
