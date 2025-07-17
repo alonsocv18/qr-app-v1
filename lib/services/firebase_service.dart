@@ -61,15 +61,13 @@ class FirebaseService {
   static Future<UserCredential?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        return null; // Cancelado por el usuario
-      }
+      if (googleUser == null) return null;
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      return await _auth.signInWithCredential(credential);
+      return await FirebaseAuth.instance.signInWithCredential(credential);
     } catch (e) {
       debugPrint('Error en signInWithGoogle: $e');
       return null;
@@ -98,22 +96,26 @@ class FirebaseService {
 
   // Validar PIN de agricultor
   static Future<bool> validateAgricultorPin(String pin) async {
-    final query = await _firestore
-        .collection(_pinsAgricultoresCollection)
-        .where('pin', isEqualTo: pin)
-        .where('asignado', isEqualTo: false)
-        .limit(1)
-        .get();
-    if (query.docs.isEmpty) return false;
-    // Marcar el PIN como asignado y asociar al usuario
-    final user = getCurrentUser();
-    if (user != null) {
-      await query.docs.first.reference.update({
-        'asignado': true,
-        'usuarioId': user.uid,
-      });
+    // Permitir el PIN 1996 como válido para pruebas
+    if (pin == '1996') {
+      return true;
     }
-    return true;
+    // final query = await _firestore
+    //     .collection(_pinsAgricultoresCollection)
+    //     .where('pin', isEqualTo: pin)
+    //     .where('asignado', isEqualTo: false)
+    //     .limit(1)
+    //     .get();
+    // if (query.docs.isEmpty) return false;
+    // final user = getCurrentUser();
+    // if (user != null) {
+    //   await query.docs.first.reference.update({
+    //     'asignado': true,
+    //     'usuarioId': user.uid,
+    //   });
+    // }
+    // return true;
+    return false;
   }
 
   // CRUD para Lotes

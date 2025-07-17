@@ -1,9 +1,33 @@
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 import 'user_type_selection.dart';
+import '../services/firebase_service.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  bool _isLoading = false;
+
+  Future<void> _handleStart() async {
+    setState(() { _isLoading = true; });
+    final credential = await FirebaseService.signInWithGoogle();
+    setState(() { _isLoading = false; });
+    if (credential != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const UserTypeSelection()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error al iniciar sesión con Google. Intenta de nuevo.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,31 +123,26 @@ class SplashScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const UserTypeSelection(),
+                  child: _isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                          ),
+                          onPressed: _handleStart,
+                          child: const Text(
+                            'Comenzar',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                      );
-                    },
-                    child: const Text(
-                      'Comenzar',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
                 ),
               ],
             ),
